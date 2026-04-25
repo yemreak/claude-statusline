@@ -37,6 +37,10 @@ curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/unin
 curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/uninstall.sh | sh -s -- -g
 ```
 
+## Discussion
+
+Reddit thread: [r/ClaudeAI · "I put the 5h + 7d rate-limit countdown on my Claude Code status line and stopped overshooting the cap"](https://www.reddit.com/r/ClaudeAI/comments/1svdg4e/i_put_the_5h_7d_ratelimit_countdown_on_my_claude/)
+
 ## License
 
 MIT · see [LICENSE](LICENSE)
