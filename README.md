@@ -1,65 +1,41 @@
 # claude-statusline
 
-A rich Claude Code status line — model, context bar, token counters, session cost, and **5h + 7d rate-limit countdowns**.
+# I put the 5h + 7d rate-limit countdown on my Claude Code status line and stopped overshooting the cap
+
+I noticed I was burning through my 5-hour window without knowing where I was in it. The default status line doesn't tell you when the cap resets. I'd push hard thinking "I have more time," then run into the wall mid-task. Same with the 7-day rolling cap.
+
+Once I put the resets on the bar, I started pacing differently.
 
 ![statusline-render](images/statusline-render.png)
+> My Claude Code status line. Left to right: model (Opus 4.7, 1M context), context bar (11% used), token counters (in:110K out:54K ctx:165K), session cost ($4.4439), 5-hour window (48% remaining, resets in 1h41m), 7-day window (93% remaining, resets in 161h21m). The two countdowns on the right — that's what I plan my day around.
 
-> Left to right: model (Opus 4.7, 1M context), context bar (11% used), token counters (in:110K out:54K ctx:165K), session cost ($4.4439), 5-hour window (48% remaining, resets in 1h41m), 7-day window (93% remaining, resets in 161h21m).
+The countdowns are the part that actually changed my behavior — for me. A percentage tells you a state. A countdown tells you when the state ends. `5h:48%(1h41m)` = 48% of the window left, resets in 1h41m. I see that and either close the loop or park the work for after reset.
 
-The two countdowns on the right are the load-bearing piece — a percentage tells you a state, a countdown tells you when the state ends. That's what changes day-planning behavior.
+## Install (one-liner · `jq` required)
 
-## Install
-
-**Project-local** (default · writes `./.claude/settings.json` in the current directory):
+Run from inside your project — installs to `./.claude/settings.json` (project-local):
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/install.sh | sh
 ```
 
-**Global** (writes `~/.claude/settings.json` · applies to every Claude Code session):
+For a global install (`~/.claude/settings.json`, applies to every Claude Code session) add `-s -- -g`:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/install.sh | sh -s -- -g
 ```
 
-Restart Claude Code · the bar appears on the next turn.
+Restart Claude Code · the bar renders on the next turn. The 5h / 7d segments only show on plans where Claude Code populates `rate_limits.five_hour` / `rate_limits.seven_day` (Pro / Max); API-only setups quietly leave those segments empty.
 
 ## Uninstall
 
 ```sh
-# project-local (cwd)
+# project-local
 curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/uninstall.sh | sh
 
 # global
 curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/uninstall.sh | sh -s -- -g
 ```
-
-## What it does
-
-- merges a `statusLine` block into the target `settings.json`
-- backs up an existing `statusLine` (if any) to `<settings>.bak.<timestamp>`
-- atomic write (`mktemp` → `mv`) · never leaves a half-written file
-- idempotent · re-running refreshes the block
-
-## Requirements
-
-- `jq` on `PATH` (macOS: `brew install jq` · linux: `apt-get install jq`)
-- Claude Code CLI
-
-## Anatomy of the bar
-
-```
-Opus 4.7 (1M context) │ ▓░░░░░░░░░ 11% │ in:110K out:54K ctx:165K │ $4.4439 │ 5h:48%(1h41m) │ 7d:93%(161h21m)
-└── model ──────────┘ └── ctx-bar ───┘ └── token-counters ─────┘ └─cost─┘ └── 5h-window ─┘ └── 7d-window ──┘
-```
-
-- **model** · cyan
-- **context bar** · 10-cell · green <70% · yellow 70-89% · red ≥90%
-- **token counters** · `in:` = input + cache_creation + cache_read · `out:` = total output · `ctx:` = sum
-- **cost** · session USD with 4 decimals (only when > 0)
-- **5h / 7d window** · `<remaining-percent>%(<time-until-reset>)` · green >30% · yellow 11-30% · red ≤10%
-
-The 5h and 7d segments only render on plans where Claude Code populates `rate_limits.five_hour` / `rate_limits.seven_day` (Pro / Max). API-only setups quietly leave them empty.
 
 ## License
 
