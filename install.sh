@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 # claude-statusline · installer
-# adds a rich statusLine block to ~/.claude/settings.json
+# adds a rich statusLine block to a Claude Code settings.json
+#
+#   default          ./.claude/settings.json   (project-local · cwd)
+#   -g | --global    ~/.claude/settings.json   (user-global)
+#
 # idempotent · backs up the existing statusLine before overwriting
 # requires: jq
 
@@ -11,16 +15,31 @@ GRN='\033[32m'
 DIM='\033[2m'
 RST='\033[0m'
 
-ok()   { printf "%b✓%b %s\n" "$GRN" "$RST" "$1"; }
-err()  { printf "%b✗%b %s\n" "$RED" "$RST" "$1" >&2; exit 1; }
-note() { printf "%b%s%b\n" "$DIM" "$1" "$RST"; }
+ok()    { printf "%b\xe2\x9c\x93%b %s\n" "$GRN" "$RST" "$1"; }
+err()   { printf "%b\xe2\x9c\x97%b %s\n" "$RED" "$RST" "$1" >&2; exit 1; }
+note()  { printf "%b%s%b\n" "$DIM" "$1" "$RST"; }
+usage() { printf "usage: install.sh [-g|--global]\n  default: ./.claude/settings.json\n  -g:      ~/.claude/settings.json\n" >&2; exit 2; }
+
+# ── 0. parse args ────────────────────────────────────────────────────
+SCOPE=local
+case "${1-}" in
+  ""             ) SCOPE=local  ;;
+  -g|--global    ) SCOPE=global ;;
+  -h|--help      ) usage        ;;
+  *              ) usage        ;;
+esac
 
 # ── 1. require jq ────────────────────────────────────────────────────
 command -v jq >/dev/null 2>&1 || err "jq required. macOS: brew install jq · linux: apt-get install jq"
 
-# ── 2. ensure settings file ──────────────────────────────────────────
-SETTINGS="${HOME}/.claude/settings.json"
-mkdir -p "${HOME}/.claude"
+# ── 2. resolve target settings file ──────────────────────────────────
+if [ "$SCOPE" = global ]; then
+  CLAUDE_DIR="${HOME}/.claude"
+else
+  CLAUDE_DIR="$(pwd)/.claude"
+fi
+SETTINGS="${CLAUDE_DIR}/settings.json"
+mkdir -p "$CLAUDE_DIR"
 [ -f "$SETTINGS" ] || echo '{}' > "$SETTINGS"
 
 # ── 3. statusLine command (literal jq one-liner) ─────────────────────
@@ -34,7 +53,7 @@ JQ_PROGRAM
 if jq -e '.statusLine' "$SETTINGS" >/dev/null 2>&1; then
   STAMP=$(date +%Y%m%d-%H%M%S)
   cp "$SETTINGS" "${SETTINGS}.bak.${STAMP}"
-  note "backup → ${SETTINGS}.bak.${STAMP}"
+  note "backup -> ${SETTINGS}.bak.${STAMP}"
 fi
 
 # ── 5. atomic merge ──────────────────────────────────────────────────
@@ -43,5 +62,5 @@ trap 'rm -f "$TMP"' EXIT
 jq --arg cmd "$STATUSLINE_CMD" '.statusLine = {type:"command", command:$cmd}' "$SETTINGS" > "$TMP"
 mv "$TMP" "$SETTINGS"
 
-ok  "statusline installed → ${SETTINGS}"
-note "restart Claude Code · the bar appears on the next turn"
+ok   "statusline installed -> ${SETTINGS}  (scope: ${SCOPE})"
+note "restart Claude Code - the bar appears on the next turn"

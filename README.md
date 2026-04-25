@@ -10,8 +10,16 @@ The two countdowns on the right are the load-bearing piece — a percentage tell
 
 ## Install
 
+**Project-local** (default · writes `./.claude/settings.json` in the current directory):
+
 ```sh
 curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/install.sh | sh
+```
+
+**Global** (writes `~/.claude/settings.json` · applies to every Claude Code session):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/install.sh | sh -s -- -g
 ```
 
 Restart Claude Code · the bar appears on the next turn.
@@ -19,15 +27,19 @@ Restart Claude Code · the bar appears on the next turn.
 ## Uninstall
 
 ```sh
+# project-local (cwd)
 curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/uninstall.sh | sh
+
+# global
+curl -fsSL https://raw.githubusercontent.com/yemreak/claude-statusline/main/uninstall.sh | sh -s -- -g
 ```
 
 ## What it does
 
-- merges a `statusLine` block into `~/.claude/settings.json`
-- backs up the existing `statusLine` (if any) to `~/.claude/settings.json.bak.<timestamp>`
-- atomic write (tmp → mv) · never leaves a half-written file
-- idempotent · re-running just refreshes the block
+- merges a `statusLine` block into the target `settings.json`
+- backs up an existing `statusLine` (if any) to `<settings>.bak.<timestamp>`
+- atomic write (`mktemp` → `mv`) · never leaves a half-written file
+- idempotent · re-running refreshes the block
 
 ## Requirements
 
