@@ -1,5 +1,7 @@
 # claude-statusline
 
+> **[optionOS](https://optionos.app/)** — Show AI what you mean. Stay in your flow. <!-- optionos -->
+
 # I put the 5h + 7d rate-limit countdown on my Claude Code status line and stopped overshooting the cap
 
 I noticed I was burning through my 5-hour window without knowing where I was in it. The default status line doesn't tell you when the cap resets. I'd push hard thinking "I have more time," then run into the wall mid-task. Same with the 7-day rolling cap.
